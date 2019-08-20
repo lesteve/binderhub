@@ -1,6 +1,9 @@
 """
 Main handler classes for requests
 """
+import urllib.request
+import urllib.error
+
 from tornado.web import HTTPError, authenticated
 from tornado.httputil import url_concat
 from tornado.log import app_log
@@ -69,6 +72,12 @@ class ParameterizedMainHandler(BaseHandler):
             
             blob_or_tree = 'blob' if filepath else 'tree'
             nbviewer_url = f'{nbviewer_url}/{org}/{repo_name}/{blob_or_tree}/{ref}/{filepath}'
+
+            try:
+                urllib.request.urlopen(nbviewer_url)
+            except urllib.error.HTTPError:
+                nbviewer_url = None
+
         self.render_template(
             "loading.html",
             base_url=self.settings['base_url'],
